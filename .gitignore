@@ -1,0 +1,10 @@
+.DS_Store
+\#*
+session*
+auto-save-list
+*elc
+url/cookies
+backups/*
+eshell/*
+places
+.smex-items
