@@ -43,17 +43,3 @@ vi style of % jumping to matching brace."
 (global-set-key (kbd "C-z") 'undo)
 (global-set-key (kbd "C-%") 'goto-match-paren)
 (global-set-key (kbd "C-d") 'duplicate-line)
-
-;; auto created by emacs
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes (quote ("4711e8fe63ef13accc884c59469067d2f497e79c" "485737acc3bedc0318a567f1c0f5e7ed2dfde3fb" "69349beba557a65bb06f89b28b8fd2890c742f07" default))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
