@@ -11,6 +11,7 @@
 (global-smart-tab-mode t)
 (setq-default tab-width 4)
 (autoload 'whitespace-mode           "whitespace" "Toggle whitespace visualization."        t)
+(setq yas/prompt-functions '(yas/dropdown-prompt))
 
 ;; display settings
 ;; (load-theme 'zenburn)
@@ -28,6 +29,33 @@ vi style of % jumping to matching brace."
   (cond ((looking-at "\\s\(") (forward-list 1) (backward-char 1))
         ((looking-at "\\s\)") (forward-char 1) (backward-list 1))
         (t (self-insert-command (or arg 1)))))
+
+(defun blank-line-p ()
+  "Check if this is a blank line"
+  (save-excursion
+    (beginning-of-line) (looking-at "[ \t]*$")))
+
+; sql mode enhancement
+(defun my-sql-send-paragraph ()
+  "send paragraph without the extra line to sql buffer"
+  (interactive)
+  (let ((start (save-excursion
+                 (backward-paragraph)
+                 (if (not (blank-line-p))
+                     (point)
+                   (forward-line 1)
+                   (point))))
+        (end (save-excursion
+               (forward-paragraph)
+               (point-min))))
+    (sql-send-region start end)))
+
+(defun my-addition-to-sql-mode ()
+  "override send-paragraph key to my function"
+  (local-set-key (kbd "C-c C-r") 'my-addition-to-sql-mode)
+  (toggle-truncate-lines))
+
+(add-hook 'sql-mode-hook 'my-addition-to-sql-mode)
 
 (defun duplicate-line()
   (interactive)
