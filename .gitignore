@@ -9,3 +9,5 @@ eshell/*
 places
 .smex-items
 elpa/archives/**
+bookmarks
+tramp

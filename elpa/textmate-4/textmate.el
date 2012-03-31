@@ -1,13 +1,15 @@
 ;;; textmate.el --- TextMate minor mode for Emacs
 
-;; Copyright (C) 2008, 2009 Chris Wanstrath <chris@ozmm.org>
+;;; Copyright (C) 2008, 2009 Chris Wanstrath <chris@ozmm.org>
 
 ;; Licensed under the same terms as Emacs.
 
-;; Keywords: textmate osx mac
-;; Created: 22 Nov 2008
-;; Author: Chris Wanstrath <chris@ozmm.org>
-;; Version: 3
+;;; Keywords: textmate osx mac
+;;; Created: 22 Nov 2008
+;;; Author: Chris Wanstrath <chris@ozmm.org>
+;;; Maintainer: Tim Visher <tim.visher@gmail.com>
+;;; Adapted-By: Tim Visher <tim.visher@gmail.com>
+;;; Version: 4
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -16,19 +18,19 @@
 ;; This minor mode exists to mimick TextMate's awesome
 ;; features.
 
-;;    T - Go to File
-;;  çT - Go to Symbol
-;;    L - Go to Line
-;;  çL - Select Line (or expand Selection to select lines)
-;;    / - Comment Line (or Selection/Region)
-;;    ] - Shift Right
-;;    [ - Shift Left
-;;  %] - Align Assignments
-;;  %[ - Indent Line
-;;    %‘ - Column Up
-;;    %“ - Column Down
-;;  RET - Insert Newline at Line's End
-;;  %T - Reset File Cache (for Go to File)
+;;         s-t - Go to File
+;;         s-T - Go to Symbol
+;;         s-l - Go to Line
+;;         s-L - Select Line (or expand Selection to select lines)
+;;         s-/ - Comment Line (or Selection/Region)
+;;         s-] - Shift Right
+;;         s-[ - Shift Left
+;;       M-s-] - Align Assignments
+;;       M-s-[ - Indent Line
+;;      M-<up> - Column Up
+;;    M-<down> - Column Down
+;;       s-RET - Insert Newline at Line's End
+;;       M-s-t - Reset File Cache (for Go to File)
 
 ;; A "project" in textmate-mode is determined by the presence of
 ;; a .git directory, an .hg directory, a Rakefile, or a Makefile.
@@ -48,14 +50,33 @@
 
 ;;; Installation
 
-;; $ cd ~/.emacs.d/vendor
-;; $ git clone git://github.com/defunkt/textmate.el.git
-;;
-;; In your emacs config:
-;;
-;; (add-to-list 'load-path "~/.emacs.d/vendor/textmate.el")
-;; (require 'textmate)
-;; (textmate-mode)
+;; You'll need Emacs 24, which comes with package.el. It's not hard to
+;; compile [from source](http://github.com/emacsmirror/emacs), but
+;; precompiled versions are readily available for
+;; [Debian-based systems](http://emacs.naquadah.org/),
+;; [Mac OS X](http://emacsformacosx.com/builds), and
+;; [Windows](http://code.google.com/p/emacs-for-windows/updates/list).
+
+;; Add Marmalade as a package archive source in ~/.emacs.d/init.el:
+
+;; ```Lisp
+;; (require 'package)
+;; (add-to-list 'package-archives
+;;              '("marmalade" . "http://marmalade-repo.org/packages/") t)
+;; (package-initialize)
+;; ````
+
+;; Then you can install it:
+
+;;     M-x package-refresh-contents
+;;     M-x package-install RET textmate RET
+
+;; Please be advised that this mode _requires_ [GNU
+;; findutils](http://www.gnu.org/software/findutils/) or another POSIX
+;; find tool chain. If you're on Windows, you can easily install these
+;; from the wonderful [GnuWin32
+;; project](http://gnuwin32.sourceforge.net/packages/findutils.htm).
+;; Other *nix system should have them installed already.
 
 ;;; Depends on imenu
 (require 'imenu)
@@ -66,8 +87,64 @@
 
 ;;; Minor mode
 
+(require 'grep)
+
+(defun textmate-find-ignore-argument ()
+  (concat
+   (and grep-find-ignored-directories
+        (concat "-type d "
+                (shell-quote-argument "(")
+                ;; we should use shell-quote-argument here
+                " -path "
+                (mapconcat
+                 #'(lambda (ignore)
+                     (cond ((stringp ignore)
+                            (shell-quote-argument
+                             (concat "*/" ignore)))
+                           ((consp ignore)
+                            (and (funcall (car ignore) dir)
+                                 (shell-quote-argument
+                                  (concat "*/"
+                                          (cdr ignore)))))))
+                 grep-find-ignored-directories
+                 " -o -path ")
+                " "
+                (shell-quote-argument ")")
+                " -prune -o "))
+   (and grep-find-ignored-files
+        (concat (shell-quote-argument "(")
+                ;; we should use shell-quote-argument here
+                " -name "
+                (mapconcat
+                 #'(lambda (ignore)
+                     (cond ((stringp ignore)
+                            (shell-quote-argument ignore))
+                           ((consp ignore)
+                            (and (funcall (car ignore) dir)
+                                 (shell-quote-argument
+                                  (cdr ignore))))))
+                 grep-find-ignored-files
+                 " -o -name ")
+                " "
+                (shell-quote-argument ")")
+                " -prune -o "))))
+
 (defvar *textmate-gf-exclude*
-  "(/|^)(\\.+[^/]+|vendor|fixtures|tmp|log|classes|build)($|/)|(\\.xcodeproj|\\.nib|\\.framework|\\.app|\\.pbproj|\\.pbxproj|\\.xcode|\\.xcodeproj|\\.bundle|\\.pyc)(/|$)"
+  (concat "(/|^)"
+          "(\\.+[^/]+|vendor|fixtures|tmp|log|classes|build)"
+          "($|/)"
+          "|"
+          "(\\.xcodeproj"
+          "|\\.nib"
+          "|\\.framework"
+          "|\\.app"
+          "|\\.pbproj"
+          "|\\.pbxproj"
+          "|\\.xcode"
+          "|\\.xcodeproj"
+          "|\\.bundle"
+          "|\\.pyc)"
+          "(/|$)")
   "Regexp of files to exclude from `textmate-goto-file'.")
 
 (defvar *textmate-project-roots*
@@ -81,7 +158,7 @@
   "The library `textmade-goto-symbol' and `textmate-goto-file' should use for
 completing filenames and symbols (`ido' by default)")
 
-(defvar textmate-find-files-command "find \"%s\" -type f"
+(defvar textmate-find-files-command (concat "find \"%s\" " (textmate-find-ignore-argument) "-type f -print")
   "The command `textmate-project-files' uses to find files. %s will be replaced
 by the project root.")
 
@@ -99,35 +176,35 @@ by the project root.")
 (defvar *textmate-mode-map*
   (let ((map (make-sparse-keymap)))
     (cond ((featurep 'aquamacs)
-     (define-key map [A-return] 'textmate-next-line)
-     (define-key map (kbd "A-M-t") 'textmate-clear-cache)
-     (define-key map (kbd "A-M-]") 'align)
-     (define-key map (kbd "A-M-[") 'indent-according-to-mode)
-     (define-key map (kbd "A-]")  'textmate-shift-right)
-     (define-key map (kbd "A-[") 'textmate-shift-left)
-     (define-key map (kbd "A-/") 'comment-or-uncomment-region-or-line)
-     (define-key map (kbd "A-L") 'textmate-select-line)
-     (define-key map (kbd "A-t") 'textmate-goto-file)
-     (define-key map (kbd "A-T") 'textmate-goto-symbol)
-     (define-key map (kbd "M-<up>") 'textmate-column-up)
-     (define-key map (kbd "M-<down>") 'textmate-column-down)
-     (define-key map (kbd "M-S-<up>") 'textmate-column-up-with-select)
-     (define-key map (kbd "M-S-<down>") 'textmate-column-down-with-select))
-    (t ;; Any other version
-     (define-key map [(super meta return)] 'textmate-next-line)
-     (define-key map [(super meta t)] 'textmate-clear-cache)
-     (define-key map [(super meta \])] 'align)
-     (define-key map [(super meta \[)] 'indent-according-to-mode)
-     (define-key map [(super \])]  'textmate-shift-right)
-     (define-key map [(super \[)] 'textmate-shift-left)
-     (define-key map [(super /)] 'comment-or-uncomment-region-or-line)
-     (define-key map [(super t)] 'textmate-goto-file)
-     (define-key map [(super shift l)] 'textmate-select-line)
-     (define-key map [(super shift t)] 'textmate-goto-symbol)
-     (define-key map [(meta up)] 'textmate-column-up)
-     (define-key map [(meta down)] 'textmate-column-down)
-     (define-key map [(meta shift up)] 'textmate-column-up-with-select)
-     (define-key map [(meta shift down)] 'textmate-column-down-with-select)))
+           (define-key map [A-return] 'textmate-next-line)
+           (define-key map (kbd "A-M-t") 'textmate-clear-cache)
+           (define-key map (kbd "A-M-]") 'align)
+           (define-key map (kbd "A-M-[") 'indent-according-to-mode)
+           (define-key map (kbd "A-]")  'textmate-shift-right)
+           (define-key map (kbd "A-[") 'textmate-shift-left)
+           (define-key map (kbd "A-/") 'comment-or-uncomment-region-or-line)
+           (define-key map (kbd "A-L") 'textmate-select-line)
+           (define-key map (kbd "A-t") 'textmate-goto-file)
+           (define-key map (kbd "A-T") 'textmate-goto-symbol)
+           (define-key map (kbd "M-<up>") 'textmate-column-up)
+           (define-key map (kbd "M-<down>") 'textmate-column-down)
+           (define-key map (kbd "M-S-<up>") 'textmate-column-up-with-select)
+           (define-key map (kbd "M-S-<down>") 'textmate-column-down-with-select))
+          (t ;; Any other version
+           (define-key map [(super meta return)] 'textmate-next-line)
+           (define-key map [(super meta t)] 'textmate-clear-cache)
+           (define-key map [(super meta \])] 'align)
+           (define-key map [(super meta \[)] 'indent-according-to-mode)
+           (define-key map [(super \])]  'textmate-shift-right)
+           (define-key map [(super \[)] 'textmate-shift-left)
+           (define-key map [(super /)] 'comment-or-uncomment-region-or-line)
+           (define-key map [(super t)] 'textmate-goto-file)
+           (define-key map [(super shift l)] 'textmate-select-line)
+           (define-key map [(super shift t)] 'textmate-goto-symbol)
+           (define-key map [(meta up)] 'textmate-column-up)
+           (define-key map [(meta down)] 'textmate-column-down)
+           (define-key map [(meta shift up)] 'textmate-column-up-with-select)
+           (define-key map [(meta shift down)] 'textmate-column-down-with-select)))
     map))
 
 (defvar *textmate-project-root* nil
@@ -149,7 +226,7 @@ function."
   (let ((reading-fn
          (cadr (assoc textmate-completing-library
                       *textmate-completing-function-alist*))))
-  (apply (symbol-function reading-fn) args)))
+    (apply (symbol-function reading-fn) args)))
 
 ;;; allow-line-as-region-for-function adds an "-or-line" version of
 ;;; the given comment function which (un)comments the current line is
@@ -157,19 +234,19 @@ function."
 ;;; and is licensed under the GPL
 
 (defmacro allow-line-as-region-for-function (orig-function)
-`(defun ,(intern (concat (symbol-name orig-function) "-or-line"))
-   ()
-   ,(format "Like `%s', but acts on the current line if mark is not active."
-            orig-function)
-   (interactive)
-   (if mark-active
-       (call-interactively (function ,orig-function))
-     (save-excursion
-       ;; define a region (temporarily) -- so any C-u prefixes etc. are preserved.
-       (beginning-of-line)
-       (set-mark (point))
-       (end-of-line)
-       (call-interactively (function ,orig-function))))))
+  `(defun ,(intern (concat (symbol-name orig-function) "-or-line"))
+     ()
+     ,(format "Like `%s', but acts on the current line if mark is not active."
+              orig-function)
+     (interactive)
+     (if mark-active
+         (call-interactively (function ,orig-function))
+       (save-excursion
+         ;; define a region (temporarily) -- so any C-u prefixes etc. are preserved.
+         (beginning-of-line)
+         (set-mark (point))
+         (end-of-line)
+         (call-interactively (function ,orig-function))))))
 
 (defun textmate-define-comment-line ()
   "Add or-line (un)comment function if not already defined"
@@ -266,17 +343,17 @@ Symbols matching the text at point are put first in the completion list."
   "Uses your completing read to quickly jump to a file in a project."
   (interactive)
   (let ((root (textmate-project-root)))
-    (when (null root) 
+    (when (null root)
       (error "Can't find any .git directory"))
-    (find-file 
-     (concat 
+    (find-file
+     (concat
       (expand-file-name root) "/"
-      (textmate-completing-read 
+      (textmate-completing-read
        "Find file: "
        (mapcar
-	(lambda (e)
-	  (replace-regexp-in-string (textmate-project-root) "" e))
-	(textmate-cached-project-files (textmate-project-root))))))))
+        (lambda (e)
+          (replace-regexp-in-string (textmate-project-root) "" e))
+        (textmate-cached-project-files (textmate-project-root))))))))
 
 (defun textmate-clear-cache ()
   "Clears the project root and project files cache. Use after adding files."
@@ -287,22 +364,20 @@ Symbols matching the text at point are put first in the completion list."
 
 ;;; Utilities
 
+
+
 (defun textmate-find-project-files (root)
   "Finds all files in a given project."
-  (split-string
-    (shell-command-to-string
-     (concat
-      (textmate-string-replace "%s" root textmate-find-files-command)
-      "  | grep -vE '"
-      *textmate-gf-exclude*
-      "' | sed 's:"
-      *textmate-project-root*
-      "/::'")) "\n" t))
+  (mapcar (lambda (s) (substring s (length root) (length s)))
+          (split-string
+           (shell-command-to-string
+            (concat
+             (textmate-string-replace "%s" root textmate-find-files-command))) "\n" t)))
 
 (defun textmate-project-files (root)
   (sort
-    (textmate-find-project-files root)
-    '(lambda (a b) (< (length a) (length b)))))
+   (textmate-find-project-files root)
+   '(lambda (a b) (< (length a) (length b)))))
 
 ;; http://snipplr.com/view/18683/stringreplace/
 (defun textmate-string-replace (this withthat in)
@@ -340,10 +415,10 @@ Symbols matching the text at point are put first in the completion list."
 (defun root-matches(root names)
   (if (root-match root names)
       (root-match root names)
-      (if (eq (length (cdr names)) 0)
-          'nil
-          (root-matches root (cdr names))
-          )))
+    (if (eq (length (cdr names)) 0)
+        'nil
+      (root-matches root (cdr names))
+      )))
 
 (defun textmate-find-project-root (&optional root)
   "Determines the current project root by recursively searching for an indicator."
