@@ -25,6 +25,7 @@
 
 (setq-default whitespace-style '(face trailing tabs))
 (global-whitespace-mode 1)
+(turn-off-auto-fill)
 
 (setq bookmark-save-flag 1)
 (setq ffip-patterns '("*.html" "*.org" "*.txt" "*.md" "*.el" "*.clj" "*.py" "*.rb" "*.js" "*.pl" "*.sh" "*.erl" "*.hs" "*.ml" "*.php"))
