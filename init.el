@@ -31,6 +31,7 @@
 (setq ffip-patterns '("*.html" "*.org" "*.txt" "*.md" "*.el" "*.clj" "*.py" "*.rb" "*.js" "*.pl" "*.sh" "*.erl" "*.hs" "*.ml" "*.php"))
 (textmate-mode)
 
+(menu-bar-mode 1)
 ;; display settings
 (color-theme-molokai)
 
@@ -51,6 +52,20 @@
 
 (add-hook 'php-mode-hook 'my-php-mode-common-hook)
 (setq auto-mode-alist (cons '("\\.php" . php-mode) auto-mode-alist))
+
+;; Turn off autosave for all tramp files
+(require 'tramp)
+(defun my-tramp-no-auto-save ()
+    (when (tramp-tramp-file-p (buffer-file-name))
+      (make-local-variable 'auto-save-default)
+      (setq auto-save-default nil)
+      (auto-save-mode -1)))
+
+(add-hook 'find-file-hooks
+          'my-tramp-no-auto-save)
+
+(provide 'my-tramp-no-auto-save)
+;;; my-tramp-no-auto-save.el ends here
 
 ;; functions
 (defun goto-match-paren (arg)

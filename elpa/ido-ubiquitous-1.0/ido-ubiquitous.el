@@ -3,7 +3,7 @@
 
 ;; Author: Ryan C. Thompson
 ;; URL: https://github.com/DarwinAwardWinner/ido-ubiquitous
-;; Version: 0.9
+;; Version: 1.0
 ;; Created: 2011-09-01
 ;; Keywords: convenience
 ;; EmacsWiki: InteractivelyDoThings
@@ -156,7 +156,9 @@ ido-ubiquitous in non-interactive functions, customize
 ;; Always disable ido-ubiquitous in `find-file' and similar functions,
 ;; because they are not supposed to use ido.
 (defvar ido-ubiquitous-permanent-function-exceptions
-  '(read-file-name)
+  '(read-file-name
+    gnus-emacs-completing-read
+    gnus-iswitchb-completing-read)
   "Functions in which ido-ubiquitous should always be disabled.
 
 If you want to disable ido in a specific function or command, do
@@ -257,7 +259,7 @@ This has no effect when ido is completing buffers or files."
 
 (defadvice bookmark-completing-read (around disable-ido-compatibility activate)
   "`bookmark-completing-read' uses `completing-read' in an odd
-  way the conflicts with the compatibilty mode of
+  way that conflicts with the compatibilty mode of
   ido-ubiquitous."
   (let (ido-ubiquitous-enable-compatibility)
     ad-do-it))

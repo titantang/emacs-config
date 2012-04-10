@@ -5,7 +5,7 @@
 
 ;; Author: Phil Hagelberg, Eric Schulte
 ;; URL: https://github.com/eschulte/rinari
-;; Version: 2.3
+;; Version: 2.6
 ;; Created: 2006-11-10
 ;; Keywords: ruby, rails, project, convenience, web
 ;; EmacsWiki: Rinari
@@ -111,7 +111,8 @@ leave this to the environment variables outside of Emacs.")
   (list ";" "'")
   "List of characters, each of which will be bound (with C-c) as a rinari-minor-mode keymap prefix.")
 
-(defvar rinari-partial-regex "render :partial *=> *[@'\"]?\\([A-Za-z/_]+\\)['\"]?"
+(defvar rinari-partial-regex
+  "render \\(:partial *=> \\)?*[@'\"]?\\([A-Za-z/_]+\\)['\"]?"
   "Regex that matches a partial rendering call.")
 
 (defadvice ruby-compilation-do (around rinari-compilation-do activate)
@@ -275,7 +276,8 @@ argument allows editing of the console command arguments."
 
     (run-ruby command)
     (with-current-buffer "*ruby*"
-      (set (make-local-variable 'inf-ruby-prompt-pattern) "^\\(j?ruby[^> ]+\\|J?RUBY[^> ]+\\|irb([^> ]+\\)?\\( ?:[0-9]+\\)* ?>>? ")
+      (set (make-local-variable 'inf-ruby-prompt-pattern)
+           "^\\(irb([^)]+)\\|\\(jruby-\\|JRUBY-\\)?[1-9]\\.[0-9]\\.[0-9]+\\(-?p?[0-9]+\\)?\\) ?\\(:[0-9]+\\)* ?[\]>*\"'/`]>? *")
       (set (make-local-variable 'inf-ruby-first-prompt-pattern) inf-ruby-prompt-pattern)
       (rinari-launch))))
 
@@ -398,7 +400,7 @@ Supported markup languages are: Erb, Haml"
   (interactive)
   (let ((line (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
     (when (string-match rinari-partial-regex line)
-      (setq line (match-string 1 line))
+      (setq line (match-string 2 line))
       (let ((file))
         (if (string-match "/" line)
             (setq file (concat (rinari-root) "app/views/" (replace-regexp-in-string "\\([^/]+\\)/\\([^/]+\\)$" "\\1/_\\2" line)))
@@ -512,7 +514,7 @@ renders and redirects to find the final controller or view."
  rinari-jump-schema
  '((model
     "m"
-    (("app/controllers/\\1_controller.rb#\\2"  . "app/models/\\1.rb#\\2")
+    (("app/controllers/\\1_controller.rb#\\2$" . "app/models/\\1.rb#\\2")
      ("app/views/\\1/.*"                       . "app/models/\\1.rb")
      ("app/helpers/\\1_helper.rb"              . "app/models/\\1.rb")
      ("db/migrate/.*create_\\1.rb"             . "app/models/\\1.rb")
@@ -521,7 +523,7 @@ renders and redirects to find the final controller or view."
      ("spec/views/\\1/.*"                      . "app/models/\\1.rb")
      ("spec/fixtures/\\1.yml"                  . "app/models/\\1.rb")
      ("test/functional/\\1_controller_test.rb" . "app/models/\\1.rb")
-     ("test/unit/\\1_test.rb#test_\\2"         . "app/models/\\1.rb#\\2")
+     ("test/unit/\\1_test.rb#test_\\2$"        . "app/models/\\1.rb#\\2")
      ("test/unit/\\1_test.rb"                  . "app/models/\\1.rb")
      ("test/fixtures/\\1.yml"                  . "app/models/\\1.rb")
      (t                                        . "app/models/"))
@@ -539,9 +541,9 @@ renders and redirects to find the final controller or view."
      ("spec/controllers/\\1_spec.rb"           . "app/controllers/\\1.rb")
      ("spec/views/\\1/\\2\\.*_spec.rb"         . "app/controllers/\\1_controller.rb#\\2")
      ("spec/fixtures/\\1.yml"                  . "app/controllers/\\1_controller.rb")
-     ("test/functional/\\1_test.rb#test_\\2"   . "app/controllers/\\1.rb#\\2")
+     ("test/functional/\\1_test.rb#test_\\2$"  . "app/controllers/\\1.rb#\\2")
      ("test/functional/\\1_test.rb"            . "app/controllers/\\1.rb")
-     ("test/unit/\\1_test.rb#test_\\2"         . "app/controllers/\\1_controller.rb#\\2")
+     ("test/unit/\\1_test.rb#test_\\2$"        . "app/controllers/\\1_controller.rb#\\2")
      ("test/unit/\\1_test.rb"                  . "app/controllers/\\1_controller.rb")
      ("test/fixtures/\\1.yml"                  . "app/controllers/\\1_controller.rb")
      (t                                        . "app/controllers/"))
@@ -572,14 +574,14 @@ renders and redirects to find the final controller or view."
      ("spec/views/\\1/\\2_spec.rb"             . "app/views/\\1/\\2.*")
      ("spec/fixtures/\\1.yml"                  . "app/views/\\1/.*")
      ("test/functional/\\1_controller_test.rb" . "app/views/\\1/.*")
-     ("test/unit/\\1_test.rb#test_\\2"         . "app/views/\\1/_?\\2.*")
+     ("test/unit/\\1_test.rb#test_\\2$"        . "app/views/\\1/_?\\2.*")
      ("test/fixtures/\\1.yml"                  . "app/views/\\1/.*")
      (t                                        . "app/views/.*"))
     t)
    (test
     "t"
-    (("app/models/\\1.rb#\\2"                  . "test/unit/\\1_test.rb#test_\\2")
-     ("app/controllers/\\1.rb#\\2"             . "test/functional/\\1_test.rb#test_\\2")
+    (("app/models/\\1.rb#\\2$"                 . "test/unit/\\1_test.rb#test_\\2")
+     ("app/controllers/\\1.rb#\\2$"            . "test/functional/\\1_test.rb#test_\\2")
      ("app/views/\\1/_?\\2\\..*"               . "test/functional/\\1_controller_test.rb#test_\\2")
      ("app/helpers/\\1_helper.rb"              . "test/functional/\\1_controller_test.rb")
      ("db/migrate/.*create_\\1.rb"             . "test/unit/\\1_test.rb")
@@ -590,7 +592,7 @@ renders and redirects to find the final controller or view."
    (rspec
     "r"
     (("app/\\1\\.rb"                           . "spec/\\1_spec.rb")
-     ("app/\\1"                                . "spec/\\1_spec.rb")
+     ("app/\\1$"                               . "spec/\\1_spec.rb")
      ("spec/views/\\1_spec.rb"                 . "app/views/\\1")
      ("spec/\\1_spec.rb"                       . "app/\\1.rb")
      (t                                        . "spec/.*"))
@@ -634,7 +636,7 @@ renders and redirects to find the final controller or view."
      ("spec/controllers/\\1_spec.rb"           . "app/helpers/\\1_helper.rb")
      ("spec/views/\\1/.*"                      . "app/helpers/\\1_helper.rb")
      ("test/functional/\\1_controller_test.rb" . "app/helpers/\\1_helper.rb")
-     ("test/unit/\\1_test.rb#test_\\2"         . "app/helpers/\\1_helper.rb#\\2")
+     ("test/unit/\\1_test.rb#test_\\2$"        . "app/helpers/\\1_helper.rb#\\2")
      ("test/unit/\\1_test.rb"                  . "app/helpers/\\1_helper.rb")
      (t                                        . "app/helpers/"))
     t)
@@ -648,7 +650,7 @@ renders and redirects to find the final controller or view."
      ("spec/controllers/\\1_spec.rb"           . "db/migrate/.*create_\\1.rb")
      ("spec/views/\\1/.*"                      . "db/migrate/.*create_\\1.rb")
      ("test/functional/\\1_controller_test.rb" . "db/migrate/.*create_\\1.rb")
-     ("test/unit/\\1_test.rb#test_\\2"         . "db/migrate/.*create_\\1.rb#\\2")
+     ("test/unit/\\1_test.rb#test_\\2$"        . "db/migrate/.*create_\\1.rb#\\2")
      ("test/unit/\\1_test.rb"                  . "db/migrate/.*create_\\1.rb")
      (t                                        . "db/migrate/"))
     (lambda (path)

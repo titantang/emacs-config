@@ -10,7 +10,12 @@
 ;;; 2. Load this file
 ;;; 3. M-x color-theme-solarized-[dark|light]
 
-(require 'solarized-definitions)
+(require 'solarized-definitions
+         (let* ((reqname (concat (file-name-directory (or load-file-name
+                                                          buffer-file-name))
+                                 "solarized-definitions.el"))
+                (compreqname (concat reqname "c")))
+           (if (file-exists-p compreqname) compreqname reqname)))
 
 (eval-when-compile
   (require 'color-theme))
@@ -38,6 +43,12 @@ Ported to Emacs by Greg Pfeil, http://ethanschoonover.com/solarized."
 (defun color-theme-solarized-light ()
   (interactive)
   (color-theme-solarized 'light))
+
+
+;;;###autoload
+(when (boundp 'custom-theme-load-path)
+  (add-to-list 'custom-theme-load-path
+               (file-name-as-directory (file-name-directory load-file-name))))
 
 (add-to-list 'color-themes
              `(color-theme-solarized-light
