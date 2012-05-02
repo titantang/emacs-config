@@ -144,3 +144,10 @@ vi style of % jumping to matching brace."
 (global-set-key (kbd "C-z") 'undo)
 (global-set-key (kbd "C-%") 'goto-match-paren)
 (global-set-key (kbd "C-d") 'duplicate-line)
+
+;; yasnippets
+(require 'yasnippet)
+(yas/initialize)
+(yas/load-directory
+ (concat (file-name-directory (or load-file-name buffer-file-name))
+         "snippets/"))
