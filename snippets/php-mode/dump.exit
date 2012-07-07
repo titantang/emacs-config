@@ -1,0 +1,4 @@
+# -*- mode: snippet -*-
+#name : var_dump(...);exit;
+# --
+var_dump(${expression});exit();$0
