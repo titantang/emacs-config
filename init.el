@@ -26,6 +26,9 @@
 (setq-default whitespace-style '(face trailing tabs))
 (global-whitespace-mode 1)
 (turn-off-auto-fill)
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+(add-hook 'lisp-mode-hook '(lambda ()
+                             (local-set-key (kbd "RET") 'newline-and-indent)))
 
 (setq bookmark-save-flag 1)
 (setq ffip-patterns '("*.html" "*.org" "*.txt" "*.md" "*.el" "*.clj" "*.py" "*.rb" "*.js" "*.pl" "*.sh" "*.erl" "*.hs" "*.ml" "*.php"))
@@ -95,7 +98,7 @@ vi style of % jumping to matching brace."
 
 ;; Behave like vi's O command
 (defun open-previous-line (arg)
-  "Open a new line before the current one. 
+  "Open a new line before the current one.
      See also `newline-and-indent'."
   (interactive "p")
   (beginning-of-line)

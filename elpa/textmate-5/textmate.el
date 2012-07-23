@@ -9,7 +9,7 @@
 ;;; Author: Chris Wanstrath <chris@ozmm.org>
 ;;; Maintainer: Tim Visher <tim.visher@gmail.com>
 ;;; Adapted-By: Tim Visher <tim.visher@gmail.com>
-;;; Version: 4
+;;; Version: 5
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -89,6 +89,43 @@
 
 (require 'grep)
 
+(defvar *textmate-gf-exclude*
+  (concat "(/|^)"
+          "(\\.+[^/]+|vendor|fixtures|tmp|log|classes|build)"
+          "($|/)"
+          "|"
+          "(\\.xcodeproj"
+          "|\\.nib"
+          "|\\.framework"
+          "|\\.app"
+          "|\\.pbproj"
+          "|\\.pbxproj"
+          "|\\.xcode"
+          "|\\.xcodeproj"
+          "|\\.bundle"
+          "|\\.pyc)"
+          "(/|$)")
+  "Regexp of files to exclude from `textmate-goto-file'.")
+
+(defvar *textmate-project-roots*
+  '(".git"
+    ".hg"
+    "Rakefile"
+    "Makefile"
+    "README"
+    "build.xml"
+    ".emacs-project"
+    "project.clj"
+    "README.md")
+  "The presence of any file/directory in this list indicates a project root.")
+
+(defvar textmate-use-file-cache t
+  "Should `textmate-goto-file' keep a local cache of files?")
+
+(defvar textmate-completing-library 'ido
+  "The library `textmade-goto-symbol' and `textmate-goto-file' should use for
+completing filenames and symbols (`ido' by default)")
+
 (defun textmate-find-ignore-argument ()
   (concat
    (and grep-find-ignored-directories
@@ -129,38 +166,14 @@
                 (shell-quote-argument ")")
                 " -prune -o "))))
 
-(defvar *textmate-gf-exclude*
-  (concat "(/|^)"
-          "(\\.+[^/]+|vendor|fixtures|tmp|log|classes|build)"
-          "($|/)"
-          "|"
-          "(\\.xcodeproj"
-          "|\\.nib"
-          "|\\.framework"
-          "|\\.app"
-          "|\\.pbproj"
-          "|\\.pbxproj"
-          "|\\.xcode"
-          "|\\.xcodeproj"
-          "|\\.bundle"
-          "|\\.pyc)"
-          "(/|$)")
-  "Regexp of files to exclude from `textmate-goto-file'.")
-
-(defvar *textmate-project-roots*
-  '(".git" ".hg" "Rakefile" "Makefile" "README" "build.xml" ".emacs-project")
-  "The presence of any file/directory in this list indicates a project root.")
-
-(defvar textmate-use-file-cache t
-  "Should `textmate-goto-file' keep a local cache of files?")
-
-(defvar textmate-completing-library 'ido
-  "The library `textmade-goto-symbol' and `textmate-goto-file' should use for
-completing filenames and symbols (`ido' by default)")
-
-(defvar textmate-find-files-command (concat "find \"%s\" " (textmate-find-ignore-argument) "-type f -print")
+(defun textmate-find-files-command ()
   "The command `textmate-project-files' uses to find files. %s will be replaced
-by the project root.")
+by the project root."
+  (concat "find \"%s\" " (textmate-find-ignore-argument) "-type f -print"))
+
+;; (defvar textmate-find-files-command (concat "find \"%s\" " (textmate-find-ignore-argument) "-type f -print")
+;;   "The command `textmate-project-files' uses to find files. %s will be replaced
+;; by the project root.")
 
 (defvar *textmate-completing-function-alist* '((ido ido-completing-read)
                                                (icicles  icicle-completing-read)
@@ -364,15 +377,13 @@ Symbols matching the text at point are put first in the completion list."
 
 ;;; Utilities
 
-
-
 (defun textmate-find-project-files (root)
   "Finds all files in a given project."
   (mapcar (lambda (s) (substring s (length root) (length s)))
           (split-string
            (shell-command-to-string
             (concat
-             (textmate-string-replace "%s" root textmate-find-files-command))) "\n" t)))
+             (textmate-string-replace "%s" root (textmate-find-files-command)))) "\n" t)))
 
 (defun textmate-project-files (root)
   (sort

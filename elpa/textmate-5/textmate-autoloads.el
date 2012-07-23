@@ -3,8 +3,8 @@
 ;;; Code:
 
 
-;;;### (autoloads (textmate-mode) "textmate" "textmate.el" (20342
-;;;;;;  36760))
+;;;### (autoloads (textmate-mode) "textmate" "textmate.el" (20492
+;;;;;;  53994))
 ;;; Generated autoloads from textmate.el
 
 (defvar textmate-mode nil "\
@@ -23,7 +23,7 @@ TextMate Emulation Minor Mode
 
 ;;;***
 
-;;;### (autoloads nil nil ("textmate-pkg.el") (20342 36761 19182))
+;;;### (autoloads nil nil ("textmate-pkg.el") (20492 53994 485080))
 
 ;;;***
 
