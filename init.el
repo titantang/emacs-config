@@ -16,6 +16,8 @@
 (setq comment-auto-fill-only-comments t)
 (setq yas/prompt-functions '(yas/dropdown-prompt))
 
+(setq auto-mode-alist (cons '("\\.pp" . puppet-mode) auto-mode-alist))
+
 (setq mouse-wheel-progressive-speed nil)
 
 (setq mouse-wheel-scroll-amount '(2
@@ -25,6 +27,7 @@
 
 (setq-default whitespace-style '(face trailing tabs))
 (global-whitespace-mode 1)
+(electric-pair-mode 1)
 (turn-off-auto-fill)
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 (add-hook 'lisp-mode-hook '(lambda ()
