@@ -27,15 +27,36 @@
 
 (setq-default whitespace-style '(face trailing tabs))
 (global-whitespace-mode 1)
-(electric-pair-mode 1)
+
+(require 'autopair)
+(autopair-global-mode) ;; enable autopair in all buffers
+
 (turn-off-auto-fill)
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 (add-hook 'lisp-mode-hook '(lambda ()
                              (local-set-key (kbd "RET") 'newline-and-indent)))
+(add-to-list 'auto-mode-alist '("Gemfile" . ruby-mode))
 
 (setq bookmark-save-flag 1)
 (setq ffip-patterns '("*.html" "*.org" "*.txt" "*.md" "*.el" "*.clj" "*.py" "*.rb" "*.js" "*.pl" "*.sh" "*.erl" "*.hs" "*.ml" "*.php"))
 (textmate-mode)
+
+(defun sgml-delete-tagged-text ()
+  "delete text between the tags that contain the current point"
+  (interactive)
+  (let ((b (point)))
+    (sgml-skip-tag-backward 1)
+    (when (not (eq b (point)))
+      ;; moved somewhere, should be at front of a tag now
+      (save-excursion
+        (forward-sexp 1)
+        (setq b (point)))
+      (sgml-skip-tag-forward 1)
+      (backward-sexp 1)
+      (delete-region b (point)))))
+
+(require 'yaml-mode)
+(add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
 
 (menu-bar-mode 1)
 ;; display settings
