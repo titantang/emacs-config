@@ -7,6 +7,7 @@
 
 ;; global settings
 (global-linum-mode 1)
+(global-visual-line-mode 1)
 (add-to-list 'hippie-expand-try-functions-list 'yas/hippie-try-expand) ;put yasnippet in hippie-expansion list
 (setq smart-tab-using-hippie-expand t)
 (global-smart-tab-mode t)
@@ -60,11 +61,17 @@
 
 (menu-bar-mode 1)
 ;; display settings
-(color-theme-molokai)
+(color-theme-solarized 'dark)
 
 ;; markdown automode
 (setq auto-mode-alist (cons '("\\.markdown" . markdown-mode) auto-mode-alist))
 (setq auto-mode-alist (cons '("\\.md" . markdown-mode) auto-mode-alist))
+
+;; feature mode
+(setq auto-mode-alist (cons '("\\.feature" . feature-mode) auto-mode-alist))
+
+;; psptl use html mode
+(setq auto-mode-alist (cons '("\\.pstpl" . html-mode) auto-mode-alist))
 
 ;; php automode
 (defun my-php-mode-common-hook ()
