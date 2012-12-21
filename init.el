@@ -73,6 +73,9 @@
 ;; psptl use html mode
 (setq auto-mode-alist (cons '("\\.pstpl" . html-mode) auto-mode-alist))
 
+;;Auto-start zencoding on any markup modes
+(add-hook 'sgml-mode-hook 'zencoding-mode)
+
 ;; php automode
 (defun my-php-mode-common-hook ()
   ;; my customizations for php-mode
