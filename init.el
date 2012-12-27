@@ -3,7 +3,7 @@
              '("marmalade" . "http://marmalade-repo.org/packages/") t)
 (add-to-list 'package-archives '("tromey" . "http://tromey.com/elpa/"))
 (package-initialize)
-(load-file "~/.emacs.d/elpa/color-theme-molokai.el")
+;; (load-file "~/.emacs.d/elpa/color-theme-molokai.el")
 
 ;; global settings
 (global-linum-mode 1)
@@ -92,7 +92,7 @@
 
 (menu-bar-mode 1)
 ;; display settings
-(color-theme-solarized 'dark)
+(load-theme 'zenburn t)
 
 ;; markdown automode
 (setq auto-mode-alist (cons '("\\.markdown" . markdown-mode) auto-mode-alist))
@@ -116,7 +116,8 @@
   (c-set-offset 'class-open 0)
   (c-set-offset 'inline-open 0)
   (c-set-offset 'substatement-open 0)
-  (c-set-offset 'arglist-intro '+))
+  (c-set-offset 'arglist-intro '+)
+  (eldoc-mode))
 
 (add-hook 'php-mode-hook 'my-php-mode-common-hook)
 (setq auto-mode-alist (cons '("\\.php" . php-mode) auto-mode-alist))
@@ -219,3 +220,26 @@ vi style of % jumping to matching brace."
 (yas/load-directory
  (concat (file-name-directory (or load-file-name buffer-file-name))
          "snippets/"))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes (quote ("72cc9ae08503b8e977801c6d6ec17043b55313cda34bcf0e6921f2f04cf2da56" "71b172ea4aad108801421cc5251edb6c792f3adbaecfa1c52e94e3d99634dee7" default))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+(defun set-exec-path-from-shell-PATH ()
+  "Set up Emacs' `exec-path' and PATH environment variable to match that used by the user's shell.
+
+This is particularly useful under Mac OSX, where GUI apps are not started from a shell."
+  (interactive)
+  (let ((path-from-shell (replace-regexp-in-string "[ \t\n]*$" "" (shell-command-to-string "$SHELL --login -i -c 'echo $PATH'"))))
+    (setenv "PATH" path-from-shell)
+    (setq exec-path (split-string path-from-shell path-separator))))
+
+(set-exec-path-from-shell-PATH)
