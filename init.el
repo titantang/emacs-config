@@ -2,6 +2,7 @@
 (add-to-list 'package-archives
              '("marmalade" . "http://marmalade-repo.org/packages/") t)
 (add-to-list 'package-archives '("tromey" . "http://tromey.com/elpa/"))
+(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (package-initialize)
 
 (load "~/.emacs.d/functions.el")
@@ -27,14 +28,15 @@
 (global-whitespace-mode 1)
 (turn-off-auto-fill)
 (setq bookmark-save-flag 1)
-(setq ffip-patterns '("*.html" "*.org" "*.txt" "*.md" "*.el" "*.clj" "*.py" "*.rb" "*.js" "*.pl" "*.sh" "*.erl" "*.hs" "*.ml" "*.php"))
+(setq ffip-patterns '("*.html" "*.org" "*.txt" "*.md" "*.el" "*.clj" "*.py" "*.rb" "*.js" "*.pl" "*.sh" "*.erl" "*.hs" "*.ml" "*.php" "*.css" "*.htm"))
+(setq scheme-program-name  "/usr/local/bin/mit-scheme")
 ;; end global settings
 
 ;; begin minor modes loading secition
 (textmate-mode)
 
-(require 'autopair)
-(autopair-global-mode) ;; enable autopair in all buffers
+; (require 'autopair)
+; (autopair-global-mode) ;; enable autopair in all buffers
 ;; end minor modes loading section
 
 ;; begin filetype section
@@ -61,6 +63,8 @@
 (global-set-key (kbd "C-z") 'undo)
 (global-set-key (kbd "C-%") 'goto-match-paren)
 (global-set-key (kbd "C-d") 'duplicate-line)
+(global-set-key (kbd "C-x f") 'find-file-in-project)
+(global-set-key (kbd "RET") 'newline-and-indent)
 ;; end key bindings
 
 ;; yasnippets
@@ -69,3 +73,15 @@
 (yas/load-directory
  (concat (file-name-directory (or load-file-name buffer-file-name))
          "snippets/"))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-todo-keywords (quote ((sequence "TODO(t)" "DONE(d)")))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
