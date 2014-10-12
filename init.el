@@ -12,8 +12,6 @@
 
 ;; global settings
 (add-to-list 'hippie-expand-try-functions-list 'yas/hippie-try-expand) ;put yasnippet in hippie-expansion list
-(setq smart-tab-using-hippie-expand t)
-(global-smart-tab-mode t)
 (setq-default tab-width 4)
 (autoload 'whitespace-mode           "whitespace" "Toggle whitespace visualization."        t)
 (auto-fill-mode 1)
@@ -32,15 +30,27 @@
 (setq scheme-program-name  "/usr/local/bin/mit-scheme")
 ;; end global settings
 
+(require 'smart-tab)
+(setq smart-tab-using-hippie-expand t)
+(global-smart-tab-mode t)
+
 ;; begin minor modes loading secition
+
 (textmate-mode)
 
-; (require 'autopair)
-; (autopair-global-mode) ;; enable autopair in all buffers
+;; use rbenv
+(require 'rbenv)
+(global-rbenv-mode)
+
+;; enable autopair in all buffers
+(require 'autopair)
+(autopair-global-mode)
+
 ;; end minor modes loading section
 
 ;; begin filetype section
 (add-to-list 'auto-mode-alist '("Gemfile" . ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
 (add-to-list 'auto-mode-alist '("\\.pp" . puppet-mode))
 (require 'yaml-mode)
 (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
@@ -53,7 +63,7 @@
 
 ;; hooks definition
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
-(add-hook 'lisp-mode-hook '(lambda () (local-set-key (kbd "RET") 'newline-and-indent)))
+;(add-hook 'lisp-mode-hook '(lambda () (local-set-key (kbd "RET") 'newline-and-indent)))
 (add-hook 'sgml-mode-hook 'zencoding-mode)
 (add-hook 'php-mode-hook 'my-php-mode-common-hook)
 (add-hook 'find-file-hooks 'my-tramp-no-auto-save)
@@ -69,10 +79,11 @@
 
 ;; yasnippets
 (require 'yasnippet)
-(yas/initialize)
+(yas-global-mode 1)
 (yas/load-directory
  (concat (file-name-directory (or load-file-name buffer-file-name))
          "snippets/"))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
