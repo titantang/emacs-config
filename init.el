@@ -64,7 +64,8 @@
 ;; hooks definition
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 ;(add-hook 'lisp-mode-hook '(lambda () (local-set-key (kbd "RET") 'newline-and-indent)))
-(add-hook 'sgml-mode-hook 'zencoding-mode)
+(add-hook 'sgml-mode-hook 'emmet-mode)
+(add-hook 'css-mode-hook 'emmet-mode)
 (add-hook 'php-mode-hook 'my-php-mode-common-hook)
 (add-hook 'find-file-hooks 'my-tramp-no-auto-save)
 ;; end hooks definition
