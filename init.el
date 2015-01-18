@@ -2,7 +2,7 @@
 (add-to-list 'package-archives
              '("marmalade" . "http://marmalade-repo.org/packages/") t)
 (add-to-list 'package-archives '("tromey" . "http://tromey.com/elpa/"))
-(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 (package-initialize)
 
 (load "~/.emacs.d/functions.el")
@@ -85,11 +85,30 @@
  (concat (file-name-directory (or load-file-name buffer-file-name))
          "snippets/"))
 
+;; expand-region
+(require 'expand-region)
+(global-set-key (kbd "C-=") 'er/expand-region)
+
+;; org-mode
+(setq org-default-notes-file "~/Dropbox/gtd.org")
+(define-key global-map "\C-cc" 'org-capture)
+(setq org-completion-use-ido t)
+
+;; dash integration
+(require 'dash-at-point)
+(autoload 'dash-at-point "dash-at-point"
+  "Search the word at point with Dash." t nil)
+(global-set-key "\C-cd" 'dash-at-point)
+
+;; load my gtd file after emacs started
+(find-file "~/Dropbox/gtd.org")
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+
  '(org-todo-keywords (quote ((sequence "TODO(t)" "DONE(d)")))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
