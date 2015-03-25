@@ -1,8 +1,10 @@
 (require 'package)
-(add-to-list 'package-archives
-             '("marmalade" . "http://marmalade-repo.org/packages/") t)
-(add-to-list 'package-archives '("tromey" . "http://tromey.com/elpa/"))
+;(add-to-list 'package-archives
+;             '("marmalade" . "http://marmalade-repo.org/packages/") t)
+;(add-to-list 'package-archives '("tromey" . "http://tromey.com/elpa/"))
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+(add-to-list 'package-archives
+             '("melpa-stable" . "http://stable.melpa.org/packages/"))
 (package-initialize)
 
 (load "~/.emacs.d/functions.el")
@@ -11,6 +13,9 @@
 (set-exec-path-from-shell-PATH)
 
 ;; global settings
+(setq backup-directory-alist `((".*" . ,temporary-file-directory)))
+(setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+
 (add-to-list 'hippie-expand-try-functions-list 'yas/hippie-try-expand) ;put yasnippet in hippie-expansion list
 (setq-default tab-width 4)
 (autoload 'whitespace-mode           "whitespace" "Toggle whitespace visualization."        t)
@@ -29,21 +34,19 @@
 (setq ffip-patterns '("*.html" "*.org" "*.txt" "*.md" "*.el" "*.clj" "*.py" "*.rb" "*.js" "*.pl" "*.sh" "*.erl" "*.hs" "*.ml" "*.php" "*.css" "*.htm"))
 (setq scheme-program-name  "/usr/local/bin/mit-scheme")
 ;; end global settings
-
 (require 'smart-tab)
 (setq smart-tab-using-hippie-expand t)
 (global-smart-tab-mode t)
-
+(setq inhibit-splash-screen t)
 ;; begin minor modes loading secition
 
 (textmate-mode)
+(setq ido-everywhere t)
 
 ;; use rbenv
-(require 'rbenv)
 (global-rbenv-mode)
 
 ;; enable autopair in all buffers
-(require 'autopair)
 (autopair-global-mode)
 
 ;; end minor modes loading section
@@ -52,7 +55,6 @@
 (add-to-list 'auto-mode-alist '("Gemfile" . ruby-mode))
 (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
 (add-to-list 'auto-mode-alist '("\\.pp" . puppet-mode))
-(require 'yaml-mode)
 (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
 (add-to-list 'auto-mode-alist '("\\.markdown$" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md$" . markdown-mode))
@@ -76,17 +78,16 @@
 (global-set-key (kbd "C-d") 'duplicate-line)
 (global-set-key (kbd "C-x f") 'find-file-in-project)
 (global-set-key (kbd "RET") 'newline-and-indent)
+(global-set-key (kbd "M-x") 'smex)
 ;; end key bindings
 
 ;; yasnippets
-(require 'yasnippet)
 (yas-global-mode 1)
 (yas/load-directory
  (concat (file-name-directory (or load-file-name buffer-file-name))
          "snippets/"))
 
 ;; expand-region
-(require 'expand-region)
 (global-set-key (kbd "C-=") 'er/expand-region)
 
 ;; org-mode
@@ -95,7 +96,6 @@
 (setq org-completion-use-ido t)
 
 ;; dash integration
-(require 'dash-at-point)
 (autoload 'dash-at-point "dash-at-point"
   "Search the word at point with Dash." t nil)
 (global-set-key "\C-cd" 'dash-at-point)
@@ -108,8 +108,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
-
- '(org-todo-keywords (quote ((sequence "TODO(t)" "DONE(d)")))))
+ '(org-todo-keywords (quote ((sequence "TODO(t)" "DONE(d)"))))
+ '(ruby-deep-indent-paren-style nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

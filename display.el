@@ -1,6 +1,8 @@
 ;; display settings
 (setq-default tab-width 4)
 (menu-bar-mode 1)
+(tool-bar-mode 0)
+(scroll-bar-mode 0)
 
 ;; chinese display
 (when (eq window-system 'ns)
