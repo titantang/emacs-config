@@ -28,6 +28,8 @@
                                    . 1)
                                   ((control))))
 (setq-default whitespace-style '(face trailing tabs))
+(column-number-mode)
+(line-number-mode)
 (global-whitespace-mode 1)
 (turn-off-auto-fill)
 (setq bookmark-save-flag 1)
@@ -61,10 +63,12 @@
 (add-to-list 'auto-mode-alist '("\\.feature$" . feature-mode))
 (add-to-list 'auto-mode-alist '("\\.pstpl$" . html-mode))
 (add-to-list 'auto-mode-alist '("\\.php$" . php-mode))
+(add-to-list 'auto-mode-alist '("\\.jsx$" . jsx-mode))
 ;; end filetype section
 
 ;; hooks definition
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+(add-hook 'before-save-hook 'untabify)
 ;(add-hook 'lisp-mode-hook '(lambda () (local-set-key (kbd "RET") 'newline-and-indent)))
 (add-hook 'sgml-mode-hook 'emmet-mode)
 (add-hook 'css-mode-hook 'emmet-mode)
