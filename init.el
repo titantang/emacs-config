@@ -35,11 +35,13 @@
 (setq bookmark-save-flag 1)
 (setq ffip-patterns '("*.html" "*.org" "*.txt" "*.md" "*.el" "*.clj" "*.py" "*.rb" "*.js" "*.pl" "*.sh" "*.erl" "*.hs" "*.ml" "*.php" "*.css" "*.htm"))
 (setq scheme-program-name  "/usr/local/bin/mit-scheme")
+(setq-default indent-tabs-mode nil)
 ;; end global settings
 (require 'smart-tab)
 (setq smart-tab-using-hippie-expand t)
 (global-smart-tab-mode t)
 (setq inhibit-splash-screen t)
+(require 'python-mode)
 ;; begin minor modes loading secition
 
 (textmate-mode)
@@ -51,6 +53,12 @@
 ;; enable autopair in all buffers
 (autopair-global-mode)
 
+;; enable rinari
+(global-rinari-mode)
+
+;; enable elpy
+(elpy-enable)
+
 ;; end minor modes loading section
 
 ;; begin filetype section
@@ -61,9 +69,11 @@
 (add-to-list 'auto-mode-alist '("\\.markdown$" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md$" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.feature$" . feature-mode))
-(add-to-list 'auto-mode-alist '("\\.pstpl$" . html-mode))
+(add-to-list 'auto-mode-alist '("\\.pstpl$" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.php$" . php-mode))
 (add-to-list 'auto-mode-alist '("\\.jsx$" . jsx-mode))
+(add-to-list 'auto-mode-alist '("\\.html$" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.html.erb$" . web-mode))
 ;; end filetype section
 
 ;; hooks definition
@@ -95,25 +105,52 @@
 (global-set-key (kbd "C-=") 'er/expand-region)
 
 ;; org-mode
-(setq org-default-notes-file "~/Dropbox/gtd.org")
-(define-key global-map "\C-cc" 'org-capture)
+(setq org-default-notes-file "~/Dropbox/notes/gtd.org")
+(setq org-directory "~/Dropbox/notes")
 (setq org-completion-use-ido t)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-ca" 'org-agenda)
+;; web-mode
+(setq web-mode-markup-indent-offset 2)
 
+;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol
+(setq org-capture-templates
+      (quote (("t" "todo" entry (file "refile.org")
+               "** TODO %?\n%U\n")
+              ("r" "respond" entry (file "refile.org")
+               "** NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+              ("n" "note" entry (file "refile.org")
+               "** %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+              ("w" "org-protocol" entry (file "refile.org")
+               "** TODO Review %c\n%U\n" :immediate-finish t)
+              ("m" "Meeting" entry (file "refile.org")
+               "** MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+              ("p" "Phone call" entry (file "refile.org")
+               "** PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t))))
+(setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                 (org-agenda-files :maxlevel . 9))))
+
+(setq org-tag-alist '(("@work" . ?w) ("@home" . ?h) ("laptop" . ?l)))
+(setq org-agenda-files (quote ("~/Dropbox/notes")))
 ;; dash integration
 (autoload 'dash-at-point "dash-at-point"
   "Search the word at point with Dash." t nil)
 (global-set-key "\C-cd" 'dash-at-point)
 
 ;; load my gtd file after emacs started
-(find-file "~/Dropbox/gtd.org")
+(find-file "~/Dropbox/notes/gtd.org")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(org-todo-keywords (quote ((sequence "TODO(t)" "DONE(d)"))))
- '(ruby-deep-indent-paren-style nil))
+ '(custom-safe-themes
+   (quote
+    ("d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default)))
+ '(package-selected-packages
+   (quote
+    (color-theme-solarized web-mode web-beautify twilight-theme tidy textmate solarized-theme smex smart-tab scss-mode sbt-mode sass-mode rvm ruby-test-mode rinari rbenv python-mode puppet-mode php-extras paredit org mustache-mode monokai-theme material-theme markdown-mode magit-svn magit-find-file lorem-ipsum log4j-mode jsx-mode js2-mode ido-ubiquitous idle-highlight-mode go-mode gitignore-mode gist geben full-ack flymake-php flymake feature-mode expand-region exec-path-from-shell emmet-mode elpy ein dockerfile-mode date-at-point dash-at-point coffee-mode autopair angular-snippets))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

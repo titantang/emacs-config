@@ -1,0 +1,10 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: rails view field
+# key: field
+# binding: direct-keybinding
+# --
+<p>
+  <%= f.label :${1:title} %><br>
+  <%= f.text_field :$1 %>
+</p>
+$0

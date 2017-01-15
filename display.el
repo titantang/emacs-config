@@ -33,4 +33,4 @@
         (set-fontset-font fn 'chinese-gb2312 `(,my-font-ja . ,rg))
         (set-fontset-font fn 'chinese-gbk `(,my-font-ja . ,rg))))))
 
-(load-theme 'zenburn t)
+(load-theme 'solarized-light t)
